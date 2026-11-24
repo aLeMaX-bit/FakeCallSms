@@ -7,11 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Cari folder proyek
+      - name: Siapkan proyek
         id: p
         run: |
           F=$(find . -name settings.gradle.kts -not -path './.git/*' | head -1)
-          if [ -z "$F" ]; then echo "settings.gradle.kts tidak ditemukan di repository"; exit 1; fi
+          if [ -z "$F" ]; then
+            Z=$(find . -name '*.zip' -not -path './.git/*' | head -1)
+            if [ -z "$Z" ]; then echo "Tidak ada proyek maupun file zip di repository"; exit 1; fi
+            mkdir -p /tmp/proj && unzip -q "$Z" -d /tmp/proj
+            F=$(find /tmp/proj -name settings.gradle.kts | head -1)
+          fi
+          if [ -z "$F" ]; then echo "settings.gradle.kts tidak ditemukan"; exit 1; fi
           echo "dir=$(dirname "$F")" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-java@v4
         with:
